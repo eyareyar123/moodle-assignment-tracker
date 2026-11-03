@@ -44,6 +44,9 @@ HUJI uses a new Moodle site per year. Change `siteUrl` in `tracker.config.json` 
 
 ## Web page (for other students)
 
+Live: **https://eyareyar123.github.io/moodle-assignment-tracker/**. Every push to `main` redeploys it
+(`.github/workflows/pages.yml`).
+
 A static page (`web/`) does the same sync in the visitor's browser and offers the workbook as a download.
 No server, no password: the visitor signs in to Moodle themselves, copies the link Moodle's mobile-app
 launch page shows (`launch.php?...&confirmed=1` → “Click here if the app does not open automatically”),
