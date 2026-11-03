@@ -12,13 +12,16 @@ export interface ApplyResult {
   added: number;
   addedRows: number[];
   subjectsAdded: string[];
+  /** Things the workbook had no room for; the rows themselves are still written. */
+  warnings: string[];
 }
 
 /**
  * Register new course labels so they appear in the Subject dropdown (Lists!A, within the range the
  * dropdown reads) and in the Dashboard "By Subject" block (a free row whose count formula is ready).
+ * A label that does not fit is reported, not fatal: rows still carry it, only the list/chart miss it.
  */
-export async function addSubjects(pkg: XlsxPackage, t: Tracker, labels: string[]): Promise<string[]> {
+export async function addSubjects(pkg: XlsxPackage, t: Tracker, labels: string[], warnings: string[] = []): Promise<string[]> {
   const lists = await Sheet.open(pkg, SHEET_LISTS);
   const dash = await Sheet.open(pkg, SHEET_DASHBOARD);
   const listEnd = subjectListEnd(t);
@@ -26,18 +29,18 @@ export async function addSubjects(pkg: XlsxPackage, t: Tracker, labels: string[]
   for (const label of labels) {
     let r = 4;
     while (r <= listEnd && lists.read(`A${r}`).value) r++;
-    if (r > listEnd) throw new Error(`No room for subject "${label}" in Lists!A4:A${listEnd} (the Subject dropdown range). Add it by hand.`);
+    if (r > listEnd) {
+      warnings.push(`No room for subject "${label}" in the Subject dropdown (Lists!A4:A${listEnd}); add it there by hand.`);
+      continue;
+    }
     lists.write(`A${r}`, label);
 
     // Dashboard: first row with an empty label next to a COUNTIF(Table1[Subject],A<row>) formula.
-    for (const row of children(dash.sheetData, "row")) {
-      const n = Number(row.getAttribute("r"));
-      const f = dash.read(`B${n}`).formula ?? "";
-      if (f.includes("Table1[Subject]") && !dash.read(`A${n}`).value) {
-        dash.write(`A${n}`, label);
-        break;
-      }
-    }
+    const free = children(dash.sheetData, "row")
+      .map((row) => Number(row.getAttribute("r")))
+      .find((n) => (dash.read(`B${n}`).formula ?? "").includes("Table1[Subject]") && !dash.read(`A${n}`).value);
+    if (free !== undefined) dash.write(`A${free}`, label);
+    else warnings.push(`No free row for "${label}" in the Dashboard's By Subject chart.`);
     added.push(label);
   }
   return added;
@@ -65,8 +68,8 @@ export async function applyPlan(pkg: XlsxPackage, plan: Plan): Promise<ApplyResu
     throw new Error(`Not enough empty table rows (${free.length}) for ${adds.length} new assignments. Run "migrate" to grow the table.`);
   }
 
-  const result: ApplyResult = { updated: 0, added: 0, addedRows: [], subjectsAdded: [] };
-  if (plan.newSubjects.length) result.subjectsAdded = await addSubjects(pkg, t, plan.newSubjects);
+  const result: ApplyResult = { updated: 0, added: 0, addedRows: [], subjectsAdded: [], warnings: [] };
+  if (plan.newSubjects.length) result.subjectsAdded = await addSubjects(pkg, t, plan.newSubjects, result.warnings);
   for (const a of plan.actions) {
     if (a.kind === "update") {
       for (const ch of a.changes) if (ch.field !== "link") writeField(t, a.row, ch.field, ch.to);

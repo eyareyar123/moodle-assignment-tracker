@@ -15,12 +15,7 @@ import { loginWithBrowser } from "./auth/login.js";
 import { MoodleClient, MoodleError } from "./moodle/client.js";
 import { fetchItems, siteInfo } from "./moodle/fetch.js";
 import { loadWorkbook, saveWorkbook, assertNotOpenInExcel } from "./excel/file.js";
-import { migrate } from "./excel/migrate.js";
-import { readTracker } from "./excel/tracker.js";
-import { applyPlan } from "./excel/write.js";
-import { sortTable } from "./excel/sort.js";
-import { buildPlan } from "./sync/plan.js";
-import { formatPlan } from "./sync/report.js";
+import { syncPackage } from "./sync/run.js";
 
 const { values, positionals } = parseArgs({
   allowPositionals: true,
@@ -58,31 +53,24 @@ async function sync() {
     if (n) console.log(`  ignoring ${n} activities without a due date (use --include-undated to add them)`);
   }
 
+  // Applied in memory either way; only --apply saves it.
   const pkg = await loadWorkbook(cfg.workbook);
-  const migrationLog = await migrate(pkg); // in memory; only saved with --apply
-  const t = await readTracker(pkg);
-  const plan = buildPlan(t.rows, items, { subjects: t.subjects, today, ignoreKeys: cfg.ignore, staleAfterDays: cfg.staleAfterDays });
-
-  console.log(`\n${formatPlan(plan, migrationLog)}\n`);
+  const out = await syncPackage(pkg, items, { today, ignoreKeys: cfg.ignore, staleAfterDays: cfg.staleAfterDays });
+  console.log(`\n${out.report}\n`);
   if (values.json) {
     await mkdir(path.dirname(path.resolve(values.json)), { recursive: true });
-    await writeFile(values.json, JSON.stringify({ items, plan }, null, 2));
+    await writeFile(values.json, JSON.stringify({ items, plan: out.plan }, null, 2));
   }
 
-  // Applied in memory either way; only --apply saves it.
-  const res = await applyPlan(pkg, plan);
-  const moved = await sortTable(pkg);
-  if (moved) console.log(`SORT: ${moved} row(s) move (pending by due date, then Submitted, then Graded).\n`);
-
-  const changes = res.updated > 0 || res.added > 0 || moved > 0 || migrationLog.length > 0 || res.subjectsAdded.length > 0;
   if (!values.apply) {
-    console.log(changes ? "Dry run — nothing written. Re-run with --apply to make these changes." : "Already up to date.");
+    console.log(out.changed ? "Dry run — nothing written. Re-run with --apply to make these changes." : "Already up to date.");
     return;
   }
-  if (!changes) return console.log("Already up to date — workbook not touched.");
+  if (!out.changed) return console.log("Already up to date — workbook not touched.");
   await assertNotOpenInExcel(cfg.workbook);
   const bak = await saveWorkbook(cfg.workbook, await pkg.save(), cfg.backupDir);
-  console.log(`Saved ${path.basename(cfg.workbook)}: ${res.updated} updated, ${res.added} added, ${moved} re-sorted. Backup: ${path.relative(process.cwd(), bak)}`);
+  const { updated, added } = out.applied;
+  console.log(`Saved ${path.basename(cfg.workbook)}: ${updated} updated, ${added} added, ${out.moved} re-sorted. Backup: ${path.relative(process.cwd(), bak)}`);
 }
 
 async function main() {

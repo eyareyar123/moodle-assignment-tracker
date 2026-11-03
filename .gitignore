@@ -11,6 +11,8 @@ secrets/
 # Personal data: the workbook, its backups, and sync output
 *.xlsx
 ~$*.xlsx
+# ...except the blank template the web page ships (built by scripts/make-template.ts, checked by tests)
+!web/public/tracker-template.xlsx
 backups/
 test/fixtures/*.xlsx
 .out/

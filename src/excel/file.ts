@@ -32,7 +32,7 @@ export async function backup(file: string, backupDir: string): Promise<string> {
 }
 
 /** Check that our bytes parse as a valid tracker, with both our reader and ExcelJS as an independent one. */
-export async function verifyWorkbook(bytes: Buffer): Promise<void> {
+export async function verifyWorkbook(bytes: Uint8Array): Promise<void> {
   await readTracker(await XlsxPackage.load(bytes));
   const wb = new ExcelJS.Workbook();
   await wb.xlsx.load(bytes as unknown as ArrayBuffer);
@@ -40,7 +40,7 @@ export async function verifyWorkbook(bytes: Buffer): Promise<void> {
 }
 
 /** Back up, verify, then atomically replace the workbook. Returns the backup path. */
-export async function saveWorkbook(file: string, bytes: Buffer, backupDir: string): Promise<string> {
+export async function saveWorkbook(file: string, bytes: Uint8Array, backupDir: string): Promise<string> {
   await assertNotOpenInExcel(file);
   await verifyWorkbook(bytes);
   const bak = await backup(file, backupDir);

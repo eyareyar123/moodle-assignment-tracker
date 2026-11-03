@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="referrer" content="no-referrer" />
+    <!-- Content-Security-Policy is added at build time (vite.config.ts); the dev server needs inline scripts. -->
+    <title>Moodle Tracker · Made By Safam</title>
+    <meta name="description" content="Turn your HUJI Moodle assignments and quizzes into a smart Excel tracker. Made By Safam." />
+    <meta name="theme-color" content="#03254e" />
+    <link rel="icon" type="image/svg+xml" href="./safam-logo.svg" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <nav class="topbar">
+      <a class="brand" href="./" aria-label="Made By Safam">
+        <img src="./safam-logo.svg" alt="" width="64" height="32" />
+        <span class="brand-text">Made By Safam</span>
+      </a>
+      <button id="lang" class="lang" type="button"></button>
+    </nav>
+
+    <div class="hero-wrap">
+    <header class="hero">
+      <div class="emblem" aria-hidden="true">
+        <svg class="ring" viewBox="0 0 300 300" dir="ltr">
+          <defs><path id="ring-path" d="M150 150 m-118 0 a118 118 0 1 1 236 0 a118 118 0 1 1 -236 0" /></defs>
+          <circle cx="150" cy="150" r="142" class="ring-line" />
+          <circle cx="150" cy="150" r="94" class="ring-line" />
+          <text><textPath href="#ring-path" textLength="736" lengthAdjust="spacing">MADE BY SAFAM ✦ MADE BY SAFAM ✦ MADE BY SAFAM ✦</textPath></text>
+        </svg>
+        <img class="emblem-logo" src="./safam-logo.svg" alt="" width="150" height="75" />
+      </div>
+      <p class="badge" data-i18n="badge"></p>
+      <h1 data-i18n-html="heroTitle"></h1>
+      <p class="sub" data-i18n="heroSub"></p>
+      <ul class="chips">
+        <li data-i18n="chipSorted"></li>
+        <li data-i18n="chipGrades"></li>
+        <li data-i18n="chipDashboard"></li>
+        <li data-i18n="chipNotes"></li>
+      </ul>
+    </header>
+    </div>
+
+    <div class="marquee-wrap">
+    <div class="marquee" dir="ltr" aria-hidden="true">
+      <div class="marquee-track">
+        <span>Made By Safam</span><i>✦</i><span>כל הדדליינים</span><i>✦</i><span>Every deadline</span><i>✦</i><span>טבלה חכמה אחת</span><i>✦</i><span>One smart tracker</span><i>✦</i>
+        <span>Made By Safam</span><i>✦</i><span>כל הדדליינים</span><i>✦</i><span>Every deadline</span><i>✦</i><span>טבלה חכמה אחת</span><i>✦</i><span>One smart tracker</span><i>✦</i>
+      </div>
+    </div>
+    </div>
+
+    <main>
+      <form id="form" class="panel" novalidate>
+        <section class="step">
+          <div class="num">01</div>
+          <div class="body">
+            <h2 data-i18n="step1Title"></h2>
+            <label for="year" class="label" data-i18n="yearLabel"></label>
+            <select id="year" name="year"></select>
+          </div>
+        </section>
+
+        <section class="step">
+          <div class="num">02</div>
+          <div class="body">
+            <h2 data-i18n="step2Title"></h2>
+            <ol class="howto">
+              <li>
+                <a id="launch" class="button ghost" href="#" target="_blank" rel="noopener noreferrer">
+                  <span data-i18n="openMoodle"></span> <span class="arrow" aria-hidden="true">↗</span>
+                </a>
+                <span data-i18n="step2a"></span>
+              </li>
+              <li>
+                <span data-i18n-html="step2b"></span>
+                <span class="mock-link" dir="ltr" aria-hidden="true">Click here if the app does not open automatically.</span>
+                <span class="muted" data-i18n="step2bPhone"></span>
+              </li>
+              <li><span data-i18n="step2c"></span></li>
+            </ol>
+            <div class="paste" dir="ltr">
+              <input id="link" name="link" type="password" autocomplete="off" spellcheck="false" aria-labelledby="link-status" />
+              <button id="paste" class="paste-btn" type="button" data-i18n="paste"></button>
+            </div>
+            <p id="link-status" class="hint" aria-live="polite"></p>
+          </div>
+        </section>
+
+        <section class="step">
+          <div class="num">03</div>
+          <div class="body">
+            <h2 data-i18n="step3Title"></h2>
+            <div class="segmented" role="radiogroup">
+              <label id="seg-new"><input type="radio" name="mode" value="new" checked /><span data-i18n="modeNew"></span></label>
+              <label id="seg-update"><input type="radio" name="mode" value="update" /><span data-i18n="modeUpdate"></span></label>
+            </div>
+            <label id="drop" class="drop" hidden>
+              <input id="file" name="file" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+              <span class="drop-icon" aria-hidden="true">⇪</span>
+              <strong id="drop-title" data-i18n="dropTitle"></strong>
+              <span class="muted" data-i18n="dropHint"></span>
+            </label>
+            <label class="switch">
+              <input id="undated" type="checkbox" />
+              <span class="track" aria-hidden="true"><span class="thumb"></span></span>
+              <span data-i18n="undated"></span>
+            </label>
+          </div>
+        </section>
+
+        <button id="build" type="submit" class="button cta"><span id="build-label" data-i18n="build"></span></button>
+      </form>
+
+      <section id="progress" class="panel" hidden aria-live="polite">
+        <ol id="stages" class="stages"></ol>
+      </section>
+
+      <section id="result" class="panel result" hidden>
+        <div class="check" aria-hidden="true">✓</div>
+        <h2 id="result-title"></h2>
+        <div class="stats">
+          <div><b id="stat-added">0</b><span data-i18n="statAdded"></span></div>
+          <div><b id="stat-updated">0</b><span data-i18n="statUpdated"></span></div>
+          <div><b id="stat-total">0</b><span data-i18n="statTotal"></span></div>
+        </div>
+        <p id="result-note" class="muted"></p>
+        <a id="download" class="button cta" href="#"><span data-i18n="download"></span> <span id="download-name" dir="auto"></span></a>
+        <div id="new-items-box" hidden>
+          <h3 data-i18n="newItems"></h3>
+          <ul id="new-items" class="items"></ul>
+        </div>
+      </section>
+
+      <p id="error" class="error" role="alert" hidden></p>
+    </main>
+
+    <footer class="footer">
+      <a class="signature" href="./" aria-label="Made By Safam">
+        <img src="./safam-logo.svg" alt="" width="120" height="60" />
+        <span class="signature-text">Made By Safam</span>
+      </a>
+      <p data-i18n="footerNote"></p>
+    </footer>
+
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

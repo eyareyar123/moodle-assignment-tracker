@@ -76,7 +76,7 @@ export class XlsxPackage {
 
   private constructor(readonly zip: JSZip) {}
 
-  static async load(data: Buffer | Uint8Array): Promise<XlsxPackage> {
+  static async load(data: Uint8Array | ArrayBuffer): Promise<XlsxPackage> {
     return new XlsxPackage(await JSZip.loadAsync(data));
   }
 
@@ -107,12 +107,12 @@ export class XlsxPackage {
     this.dirty.delete(path);
   }
 
-  async save(): Promise<Buffer> {
+  async save(): Promise<Uint8Array> {
     for (const path of this.dirty) {
       const body = new XMLSerializer().serializeToString(this.docs.get(path)!).replace(/^<\?xml[^>]*\?>\s*/, "");
       this.zip.file(path, XML_DECL + body);
     }
-    return this.zip.generateAsync({ type: "nodebuffer", compression: "DEFLATE" });
+    return this.zip.generateAsync({ type: "uint8array", compression: "DEFLATE" });
   }
 
   // ----- relationships -----

@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" role="img" aria-label="Safam">
+  <title>Safam</title>
+  <style>
+    .m { fill: #03254e; }
+    .h { stroke: #ad8350; }
+    @media (prefers-color-scheme: dark) {
+      .m { fill: #d5c9df; }
+      .h { stroke: #ad8350; }
+    }
+  </style>
+  <defs>
+    <!-- Right half; the left is its mirror. Full lobes parted at the centre, tapering into short drooping tips. -->
+    <path id="safam-half" d="M100 22 C106 12 120 6 136 8 C158 11 176 26 184 46 C189 58 190 72 186 88 C181 74 173 62 160 55 C146 48 128 50 114 52 C106 53 101 50 100 46 Z"/>
+    <!-- Hair strands fanning out from the parting. -->
+    <g id="safam-hair">
+      <path d="M106 20 C122 10 140 9 154 14"/>
+      <path d="M126 12 C146 11 164 20 176 34"/>
+      <path d="M101 25 C116 14 134 13 150 17"/>
+      <path d="M140 18 C158 22 172 32 180 46"/>
+      <path d="M101 31 C118 21 138 21 156 26"/>
+      <path d="M128 27 C152 28 170 40 183 58"/>
+      <path d="M102 37 C120 29 140 29 160 35"/>
+      <path d="M150 38 C166 44 178 56 185 70"/>
+      <path d="M105 43 C124 37 146 38 166 45"/>
+      <path d="M140 46 C160 49 174 60 184 80"/>
+    </g>
+    <clipPath id="safam-clip">
+      <use href="#safam-half"/>
+      <use href="#safam-half" transform="matrix(-1 0 0 1 200 0)"/>
+    </clipPath>
+  </defs>
+  <g class="m">
+    <use href="#safam-half"/>
+    <use href="#safam-half" transform="matrix(-1 0 0 1 200 0)"/>
+  </g>
+  <g class="h" clip-path="url(#safam-clip)" fill="none" stroke-width="1.2" stroke-linecap="round" opacity="0.8">
+    <use href="#safam-hair"/>
+    <use href="#safam-hair" transform="matrix(-1 0 0 1 200 0)"/>
+  </g>
+</svg>

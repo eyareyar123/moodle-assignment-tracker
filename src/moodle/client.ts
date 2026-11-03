@@ -30,7 +30,8 @@ export class MoodleClient {
   constructor(
     readonly siteUrl: string,
     private readonly token: string,
-    private readonly fetchImpl: typeof fetch = fetch,
+    // Wrapped: browsers throw "Illegal invocation" when fetch is called as a method of another object.
+    private readonly fetchImpl: typeof fetch = (input, init) => fetch(input, init),
   ) {}
 
   async call<T>(fn: string, params: Params = {}): Promise<T> {

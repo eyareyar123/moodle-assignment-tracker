@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { flatten, MoodleClient, MoodleError } from "../src/moodle/client.js";
 import { assignStatus, cleanText, courseCode, courseTitle, dueDate, fetchItems } from "../src/moodle/fetch.js";
 import { decodeLaunchUrl } from "../src/auth/login.js";
+import { launchUrl, parseLaunchToken } from "../src/moodle/launch.js";
 import { keyFromUrl } from "../src/moodle/types.js";
 
 const SITE = "https://moodle.huji.ac.il/2026-27";
@@ -49,6 +50,20 @@ describe("moodle helpers", () => {
     const url = `moodlemobile://token=${Buffer.from(`${sig}:::TOKEN:::PRIV`).toString("base64")}`;
     expect(decodeLaunchUrl(url, SITE, passport)).toEqual({ token: "TOKEN", privateToken: "PRIV" });
     expect(() => decodeLaunchUrl(url, SITE, "999")).toThrow(/signature/);
+  });
+  it("reads a copied app link, URL-encoded or bare, and rejects anything else", () => {
+    const tok = "0123456789abcdef0123456789abcdef";
+    const link = `moodlemobile://token=${Buffer.from(`sig:::${tok}`).toString("base64")}`;
+    expect(parseLaunchToken(link)).toEqual({ signature: "sig", token: tok, privateToken: undefined });
+    expect(parseLaunchToken(`  ${encodeURIComponent(link)}\n`).token).toBe(tok);
+    expect(parseLaunchToken(tok)).toEqual({ token: tok });
+    expect(() => parseLaunchToken("https://moodle.huji.ac.il/2026-27/my/")).toThrow(/not a Moodle app link/);
+    expect(() => parseLaunchToken(`moodlemobile://token=${Buffer.from("sig:::").toString("base64")}`)).toThrow(/no token/);
+  });
+  it("builds the launch URL, with the copyable page when confirmed", () => {
+    expect(launchUrl(SITE, "42", { confirmed: true })).toBe(
+      `${SITE}/admin/tool/mobile/launch.php?service=moodle_mobile_app&passport=42&urlscheme=moodlemobile&confirmed=1`,
+    );
   });
 });
 

@@ -10,6 +10,7 @@ import { createHash, randomInt } from "node:crypto";
 import path from "node:path";
 import { chromium } from "playwright";
 import type { Config } from "../config.js";
+import { launchUrl, parseLaunchToken } from "../moodle/launch.js";
 
 export interface LoginResult {
   token: string;
@@ -17,20 +18,18 @@ export interface LoginResult {
 }
 
 export function decodeLaunchUrl(url: string, siteUrl: string, passport: string): LoginResult {
-  const m = /^moodlemobile:\/\/token=([A-Za-z0-9+/=_-]+)/.exec(url);
-  if (!m) throw new Error("Unexpected redirect from Moodle (no token)");
-  const [signature, token, privateToken] = Buffer.from(m[1]!, "base64").toString("utf8").split(":::");
+  if (!url.startsWith("moodlemobile://token=")) throw new Error("Unexpected redirect from Moodle (no token)");
+  const { signature, token, privateToken } = parseLaunchToken(url);
   const expected = createHash("md5").update(siteUrl + passport).digest("hex");
   // Moodle signs with its wwwroot; accept a trailing-slash variant.
   const alt = createHash("md5").update(`${siteUrl}/` + passport).digest("hex");
   if (signature !== expected && signature !== alt) throw new Error("Token signature mismatch — refusing token");
-  if (!token) throw new Error("Moodle returned an empty token");
-  return { token, privateToken: privateToken || undefined };
+  return { token, privateToken };
 }
 
 export async function loginWithBrowser(cfg: Config, log: (s: string) => void = console.log): Promise<LoginResult> {
   const passport = String(randomInt(1, 2 ** 31));
-  const launch = `${cfg.siteUrl}/admin/tool/mobile/launch.php?service=moodle_mobile_app&passport=${passport}&urlscheme=moodlemobile`;
+  const launch = launchUrl(cfg.siteUrl, passport);
 
   // A persistent profile keeps the SSO session, so future logins are usually one click.
   const ctx = await chromium.launchPersistentContext(path.join(cfg.stateDir, "browser-profile"), {

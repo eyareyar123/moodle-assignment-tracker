@@ -165,12 +165,17 @@ describe("new subjects", async () => {
     expect(wb.getWorksheet("Dashboard")!.getCell("A18").value).toBe("51033 - תכנות R");
   });
 
-  it("refuses rather than overflowing the dropdown range", async () => {
+  it("warns instead of overflowing the dropdown range, and still writes the row", async () => {
     const pkg2 = await XlsxPackage.load(out);
     const t3 = await readTracker(pkg2);
     const other = { ...r, key: "quiz:1", courseCode: "99999", courseName: "Other" };
     const plan2 = buildPlan(t3.rows, [other], { subjects: t3.subjects, today: "2026-11-01" });
-    await expect(applyPlan(pkg2, plan2)).rejects.toThrow(/No room for subject/);
+    const res2 = await applyPlan(pkg2, plan2);
+    expect(res2.warnings.join("\n")).toMatch(/No room for subject "99999 - Other"/);
+    expect(res2.added).toBe(1);
+    const t4 = await readTracker(await XlsxPackage.load(await pkg2.save()));
+    expect(t4.subjects).not.toContain("99999 - Other");
+    expect(t4.rows.find((x) => x.moodleKey === "quiz:1")?.subject).toBe("99999 - Other");
   });
 });
 
@@ -183,7 +188,7 @@ describe("saveWorkbook", () => {
     const { bytes } = await migrated();
     const bak = await saveWorkbook(file, bytes, path.join(dir, "backups"));
     expect(await readFile(bak)).toEqual(orig);
-    expect(await readFile(file)).toEqual(bytes);
+    expect(await readFile(file)).toEqual(Buffer.from(bytes));
     expect(await readdir(dir)).not.toContain("book.xlsx.tmp");
   });
 

@@ -7,12 +7,20 @@
   "scripts": {
     "sync": "tsx src/cli.ts",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "test:e2e": "vitest run --config vitest.e2e.config.ts",
+    "typecheck": "tsc --noEmit",
+    "web:dev": "vite",
+    "web:build": "vite build",
+    "web:preview": "vite preview",
+    "web:local": "vite build && vite preview",
+    "web:template": "tsx scripts/make-template.ts"
   },
   "engines": {
     "node": ">=22"
   },
   "dependencies": {
+    "@fontsource-variable/rubik": "^5.3.0",
+    "@fontsource/karantina": "^5.3.0",
     "@xmldom/xmldom": "^0.9.12",
     "exceljs": "^4.4.0",
     "jszip": "^3.10.2",
@@ -22,6 +30,7 @@
     "@types/node": "^26.6.6",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
+    "vite": "^8.3.5",
     "vitest": "^5.0.5"
   },
   "allowScripts": {
