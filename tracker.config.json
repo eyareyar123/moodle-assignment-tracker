@@ -1,0 +1,11 @@
+{
+  "siteUrl": "https://moodle.huji.ac.il/2026-27",
+  "workbook": "ER assignments.xlsx",
+  "backupDir": "backups",
+  "timezone": "Asia/Jerusalem",
+  "browserChannel": "msedge",
+  "staleAfterDays": 14,
+  "ignore": [
+    "assign:47336"
+  ]
+}

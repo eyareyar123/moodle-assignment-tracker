@@ -1,0 +1,30 @@
+{
+  "name": "moodle-assignment-tracker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Sync HUJI Moodle assignments and quizzes into a personal Excel tracker",
+  "scripts": {
+    "sync": "tsx src/cli.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@xmldom/xmldom": "^0.9.12",
+    "exceljs": "^4.4.0",
+    "jszip": "^3.10.2",
+    "playwright": "^1.64.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
+  }
+}
